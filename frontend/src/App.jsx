@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+// ✅ baseURL 명확하게 설정
+const api = axios.create({
+  baseURL: "/api",
+});
+
 export default function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState("");
@@ -8,10 +13,11 @@ export default function App() {
   // 1. 목록 조회
   const fetchTodos = async () => {
     try {
-      const res = await axios.get("/api/todos");
+      const res = await api.get("/todos");
+      console.log("GET 성공:", res.data); // ✅ 디버깅
       setTodos(res.data);
     } catch (err) {
-      console.error("GET 에러:", err);
+      console.error("GET 에러:", err.response || err.message);
     }
   };
 
@@ -22,34 +28,38 @@ export default function App() {
   // 2. 추가
   const addTodo = async () => {
     if (!text.trim()) return;
+
     try {
-      await axios.post("/api/todos", { title: text }); // 🔥 수정
+      const res = await api.post("/todos", { title: text });
+      console.log("POST 성공:", res.data); // ✅ 디버깅
       setText("");
       fetchTodos();
     } catch (err) {
-      console.error("POST 에러:", err);
+      console.error("POST 에러:", err.response || err.message);
     }
   };
 
   // 3. 체크
   const toggleTodo = async (todo) => {
     try {
-      await axios.put(`/api/todos/${todo._id}`, {
-        completed: !todo.completed, // 🔥 중요
+      const res = await api.put(`/todos/${todo._id}`, {
+        completed: !todo.completed,
       });
+      console.log("PUT 성공:", res.data); // ✅ 디버깅
       fetchTodos();
     } catch (err) {
-      console.error("PUT 에러:", err);
+      console.error("PUT 에러:", err.response || err.message);
     }
   };
 
   // 4. 삭제
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`/api/todos/${id}`);
+      const res = await api.delete(`/todos/${id}`);
+      console.log("DELETE 성공:", res.data); // ✅ 디버깅
       fetchTodos();
     } catch (err) {
-      console.error("DELETE 에러:", err);
+      console.error("DELETE 에러:", err.response || err.message);
     }
   };
 
@@ -78,20 +88,20 @@ export default function App() {
         <ul>
           {todos.map((todo) => (
             <li
-              key={todo._id} // 🔥 수정
+              key={todo._id}
               className="flex justify-between items-center mb-2"
             >
               <span
-                onClick={() => toggleTodo(todo)} // 🔥 수정
+                onClick={() => toggleTodo(todo)}
                 className={`cursor-pointer ${
                   todo.completed ? "line-through text-gray-400" : ""
                 }`}
               >
-                {todo.title} {/* 🔥 수정 */}
+                {todo.title}
               </span>
 
               <button
-                onClick={() => deleteTodo(todo._id)} // 🔥 수정
+                onClick={() => deleteTodo(todo._id)}
                 className="text-red-500"
               >
                 삭제
